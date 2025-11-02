@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function ReferralSystem({ address }) {
   const [referralCode, setReferralCode] = useState('');
+  const [origin, setOrigin] = useState('');
   const [stats, setStats] = useState({
     totalReferrals: 0,
     activeReferrals: 0,
@@ -9,23 +10,27 @@ export default function ReferralSystem({ address }) {
     pendingRewards: '0.000'
   });
 
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setOrigin(window.location.origin);
+    }
+  }, []);
+
   // Generar código de referido basado en la dirección
-  const generateReferralCode = () => {
-    if (address) {
+  useEffect(() => {
+    if (address && !referralCode) {
       const code = address.slice(2, 8).toUpperCase();
       setReferralCode(code);
     }
-  };
+  }, [address, referralCode]);
 
   const copyReferralLink = () => {
-    const link = `${window.location.origin}?ref=${referralCode}`;
-    navigator.clipboard.writeText(link);
-    alert('🔗 Link copiado! Compártelo para ganar comisiones.');
+    const link = `${origin}?ref=${referralCode}`;
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(link);
+      alert('🔗 Link copiado! Compártelo para ganar comisiones.');
+    }
   };
-
-  if (!referralCode && address) {
-    generateReferralCode();
-  }
 
   return (
     <div className="bg-gradient-to-br from-purple-900 to-fuchsia-900 p-8 rounded-3xl shadow-2xl border-4 border-purple-400 glow-purple">
@@ -53,9 +58,9 @@ export default function ReferralSystem({ address }) {
             📋 Copiar Link
           </button>
         </div>
-        {referralCode && (
+        {referralCode && origin && (
           <p className="text-xs text-purple-400 mt-2 text-center">
-            {window.location.origin}?ref={referralCode}
+            {origin}?ref={referralCode}
           </p>
         )}
       </div>

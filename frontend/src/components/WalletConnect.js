@@ -1,60 +1,81 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
 import { NETWORK } from '../config';
 
 export default function WalletConnect({ onConnect }) {
   const [showModal, setShowModal] = useState(false);
   const [connecting, setConnecting] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
-  const walletOptions = [
-    {
-      name: 'MetaMask',
-      icon: '🦊',
-      description: 'La wallet más popular',
-      color: 'from-orange-500 to-orange-700',
-      available: typeof window !== 'undefined' && window.ethereum
-    },
-    {
-      name: 'WalletConnect',
-      icon: '🔗',
-      description: 'Conecta 100+ wallets',
-      color: 'from-blue-500 to-blue-700',
-      available: false, // Requiere instalación de @walletconnect/web3-provider
-      comingSoon: true
-    },
-    {
-      name: 'Coinbase Wallet',
-      icon: '🔵',
-      description: 'Wallet de Coinbase',
-      color: 'from-blue-600 to-indigo-700',
-      available: typeof window !== 'undefined' && window.coinbaseWalletExtension,
-      comingSoon: !window?.coinbaseWalletExtension
-    },
-    {
-      name: 'Trust Wallet',
-      icon: '🛡️',
-      description: 'Wallet móvil segura',
-      color: 'from-cyan-500 to-blue-600',
-      available: false,
-      comingSoon: true
-    },
-    {
-      name: 'Rabby',
-      icon: '🐰',
-      description: 'Wallet DeFi avanzada',
-      color: 'from-purple-500 to-pink-600',
-      available: typeof window !== 'undefined' && window.ethereum?.isRabby,
-      comingSoon: !window?.ethereum?.isRabby
-    },
-    {
-      name: 'OKX Wallet',
-      icon: '⭕',
-      description: 'Wallet de OKX',
-      color: 'from-gray-700 to-gray-900',
-      available: typeof window !== 'undefined' && window.okxwallet,
-      comingSoon: !window?.okxwallet
-    },
-  ];
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  const getWalletOptions = () => {
+    if (!isMounted) {
+      return [
+        { name: 'MetaMask', icon: '🦊', description: 'La wallet más popular', color: 'from-orange-500 to-orange-700', available: false, comingSoon: false },
+        { name: 'WalletConnect', icon: '🔗', description: 'Conecta 100+ wallets', color: 'from-blue-500 to-blue-700', available: false, comingSoon: true },
+        { name: 'Coinbase Wallet', icon: '🔵', description: 'Wallet de Coinbase', color: 'from-blue-600 to-indigo-700', available: false, comingSoon: true },
+        { name: 'Trust Wallet', icon: '🛡️', description: 'Wallet móvil segura', color: 'from-cyan-500 to-blue-600', available: false, comingSoon: true },
+        { name: 'Rabby', icon: '🐰', description: 'Wallet DeFi avanzada', color: 'from-purple-500 to-pink-600', available: false, comingSoon: true },
+        { name: 'OKX Wallet', icon: '⭕', description: 'Wallet de OKX', color: 'from-gray-700 to-gray-900', available: false, comingSoon: true },
+      ];
+    }
+
+    return [
+      {
+        name: 'MetaMask',
+        icon: '🦊',
+        description: 'La wallet más popular',
+        color: 'from-orange-500 to-orange-700',
+        available: !!window.ethereum,
+        comingSoon: false
+      },
+      {
+        name: 'WalletConnect',
+        icon: '🔗',
+        description: 'Conecta 100+ wallets',
+        color: 'from-blue-500 to-blue-700',
+        available: false,
+        comingSoon: true
+      },
+      {
+        name: 'Coinbase Wallet',
+        icon: '🔵',
+        description: 'Wallet de Coinbase',
+        color: 'from-blue-600 to-indigo-700',
+        available: !!window.coinbaseWalletExtension,
+        comingSoon: !window.coinbaseWalletExtension
+      },
+      {
+        name: 'Trust Wallet',
+        icon: '🛡️',
+        description: 'Wallet móvil segura',
+        color: 'from-cyan-500 to-blue-600',
+        available: false,
+        comingSoon: true
+      },
+      {
+        name: 'Rabby',
+        icon: '🐰',
+        description: 'Wallet DeFi avanzada',
+        color: 'from-purple-500 to-pink-600',
+        available: !!window.ethereum?.isRabby,
+        comingSoon: !window.ethereum?.isRabby
+      },
+      {
+        name: 'OKX Wallet',
+        icon: '⭕',
+        description: 'Wallet de OKX',
+        color: 'from-gray-700 to-gray-900',
+        available: !!window.okxwallet,
+        comingSoon: !window.okxwallet
+      },
+    ];
+  };
+
+  const walletOptions = getWalletOptions();
 
   const connectWallet = async (walletName) => {
     try {
