@@ -2,53 +2,30 @@ import { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
 import { CONTRACTS, NETWORK } from '../config';
 import { COINFLIP_ABI, DICE_ABI, ROULETTE_ABI, CASINO_ABI } from '../abis';
+import CrashGame from '../components/CrashGame';
+import LiveNotifications from '../components/LiveNotifications';
+import ReferralSystem from '../components/ReferralSystem';
+import WalletConnect from '../components/WalletConnect';
 
 export default function Home() {
   const [provider, setProvider] = useState(null);
   const [signer, setSigner] = useState(null);
   const [address, setAddress] = useState('');
   const [balance, setBalance] = useState('0');
-  const [activeTab, setActiveTab] = useState('coinflip');
+  const [activeTab, setActiveTab] = useState('crash');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [showConfetti, setShowConfetti] = useState(false);
+  const [walletName, setWalletName] = useState('');
 
-  const connectWallet = async () => {
-    try {
-      if (!window.ethereum) {
-        alert('Por favor instala MetaMask!');
-        return;
-      }
-
-      const provider = new ethers.BrowserProvider(window.ethereum);
-      await provider.send("eth_requestAccounts", []);
-      const signer = await provider.getSigner();
-      const address = await signer.getAddress();
-      const balance = await provider.getBalance(address);
-
-      setProvider(provider);
-      setSigner(signer);
-      setAddress(address);
-      setBalance(ethers.formatEther(balance));
-
-      const network = await provider.getNetwork();
-      if (Number(network.chainId) !== NETWORK.chainId) {
-        try {
-          await window.ethereum.request({
-            method: 'wallet_switchEthereumChain',
-            params: [{ chainId: `0x${NETWORK.chainId.toString(16)}` }],
-          });
-        } catch (switchError) {
-          alert(`Por favor cambia a ${NETWORK.name} en MetaMask`);
-        }
-      }
-
-      setMessage('✅ Wallet conectado!');
-      setTimeout(() => setMessage(''), 3000);
-    } catch (error) {
-      console.error(error);
-      setMessage('❌ Error conectando wallet');
-    }
+  const handleWalletConnect = (walletData) => {
+    setProvider(walletData.provider);
+    setSigner(walletData.signer);
+    setAddress(walletData.address);
+    setBalance(walletData.balance);
+    setWalletName(walletData.walletName);
+    setMessage(`✅ ${walletData.walletName} conectado!`);
+    setTimeout(() => setMessage(''), 3000);
   };
 
   return (
@@ -76,14 +53,10 @@ export default function Home() {
             </div>
           </div>
           {!address ? (
-            <button
-              onClick={connectWallet}
-              className="bg-gradient-to-r from-fuchsia-500 to-purple-600 hover:from-fuchsia-600 hover:to-purple-700 px-8 py-4 rounded-xl font-bold text-xl shadow-lg transform hover:scale-105 transition-all duration-200 animate-pulse glow-purple"
-            >
-              🔌 Conectar Wallet
-            </button>
+            <WalletConnect onConnect={handleWalletConnect} />
           ) : (
             <div className="bg-black bg-opacity-60 px-6 py-3 rounded-xl border-2 border-purple-400 glow-purple">
+              <div className="text-xs text-purple-400 mb-1">{walletName || 'Conectado'}</div>
               <div className="text-sm text-purple-300">
                 {address.slice(0, 6)}...{address.slice(-4)}
               </div>
@@ -99,9 +72,9 @@ export default function Home() {
       <main className="container mx-auto p-6 relative z-10">
         {message && (
           <div className={`${
-            message.includes('GANASTE') ? 'bg-gradient-to-r from-green-600 to-green-800 animate-bounce' :
-            message.includes('Error') || message.includes('Perdiste') ? 'bg-gradient-to-r from-red-600 to-red-800' :
-            'bg-gradient-to-r from-blue-600 to-blue-800'
+            message.includes('GANASTE') || message.includes('CASHOUT') ? 'bg-gradient-to-r from-green-600 to-green-800 animate-bounce' :
+            message.includes('Error') || message.includes('Perdiste') || message.includes('CRASH') ? 'bg-gradient-to-r from-red-600 to-red-800' :
+            'bg-gradient-to-r from-purple-600 to-fuchsia-800'
           } p-6 rounded-xl mb-6 text-center text-2xl font-bold shadow-2xl border-2 border-white`}>
             {message}
           </div>
@@ -109,67 +82,104 @@ export default function Home() {
 
         {!address ? (
           <div className="text-center py-20">
-            <div className="text-9xl mb-8 animate-bounce">🎲🎰🎡</div>
+            <div className="text-9xl mb-8 animate-bounce">🎲🎰🎡💎</div>
             <h2 className="text-6xl mb-6 font-black bg-gradient-to-r from-purple-200 via-fuchsia-300 to-purple-200 bg-clip-text text-transparent">
-              ¡Bienvenido!
+              ¡Bienvenido al Futuro!
             </h2>
-            <p className="text-2xl opacity-75 mb-12 text-purple-300">Conecta tu wallet y gana en grande 💎</p>
-            <button
-              onClick={connectWallet}
-              className="bg-gradient-to-r from-purple-500 via-fuchsia-500 to-purple-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-purple-600 px-12 py-6 rounded-2xl font-bold text-3xl shadow-2xl transform hover:scale-110 transition-all duration-300 animate-pulse glow-purple"
-            >
-              🚀 Conectar MetaMask
-            </button>
+            <p className="text-2xl opacity-75 mb-6 text-purple-300">Casino Descentralizado Web3</p>
+            <p className="text-lg mb-12 text-purple-400 max-w-2xl mx-auto">
+              💎 Juega, gana y refiere amigos • Sistema de referidos multinivel • Ganancias en tiempo real
+            </p>
+            <WalletConnect onConnect={handleWalletConnect} />
           </div>
         ) : (
           <>
-            {/* Tabs Mejorados - Morado Neón */}
-            <div className="flex gap-6 mb-8 justify-center flex-wrap">
-              <button
-                onClick={() => setActiveTab('coinflip')}
-                className={`px-8 py-4 rounded-2xl font-bold text-xl transform transition-all duration-300 ${
-                  activeTab === 'coinflip'
-                    ? 'bg-gradient-to-r from-purple-500 to-fuchsia-600 scale-110 shadow-2xl glow-purple border-2 border-purple-300'
-                    : 'bg-gray-800 hover:bg-purple-900 hover:scale-105 border-2 border-gray-700'
-                }`}
-              >
-                <div className="text-4xl mb-2">🪙</div>
-                Coin Flip
-              </button>
-              <button
-                onClick={() => setActiveTab('dice')}
-                className={`px-8 py-4 rounded-2xl font-bold text-xl transform transition-all duration-300 ${
-                  activeTab === 'dice'
-                    ? 'bg-gradient-to-r from-fuchsia-500 to-purple-600 scale-110 shadow-2xl glow-purple border-2 border-fuchsia-300'
-                    : 'bg-gray-800 hover:bg-purple-900 hover:scale-105 border-2 border-gray-700'
-                }`}
-              >
-                <div className="text-4xl mb-2">🎲</div>
-                Dice
-              </button>
-              <button
-                onClick={() => setActiveTab('roulette')}
-                className={`px-8 py-4 rounded-2xl font-bold text-xl transform transition-all duration-300 ${
-                  activeTab === 'roulette'
-                    ? 'bg-gradient-to-r from-violet-500 to-purple-600 scale-110 shadow-2xl glow-purple border-2 border-violet-300'
-                    : 'bg-gray-800 hover:bg-purple-900 hover:scale-105 border-2 border-gray-700'
-                }`}
-              >
-                <div className="text-4xl mb-2">🎡</div>
-                Roulette
-              </button>
-            </div>
+            {/* Layout con Sidebar */}
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+              {/* Sidebar - Notificaciones Live */}
+              <div className="lg:col-span-1 order-2 lg:order-1">
+                <LiveNotifications />
+              </div>
 
-            {/* Game Components */}
-            {activeTab === 'coinflip' && (
-              <CoinFlipGame signer={signer} setMessage={setMessage} setLoading={setLoading} setShowConfetti={setShowConfetti} />
-            )}
-            {activeTab === 'dice' && (
-              <DiceGame signer={signer} setMessage={setMessage} setLoading={setLoading} setShowConfetti={setShowConfetti} />
-            )}
-            {activeTab === 'roulette' && (
-              <RouletteGame signer={signer} setMessage={setMessage} setLoading={setLoading} setShowConfetti={setShowConfetti} />
-            )}
+              {/* Main Content Area */}
+              <div className="lg:col-span-3 order-1 lg:order-2">
+                {/* Tabs Mejorados - Morado Neón */}
+                <div className="flex gap-3 mb-8 justify-center flex-wrap">
+                  <button
+                    onClick={() => setActiveTab('crash')}
+                    className={`px-6 py-3 rounded-2xl font-bold text-lg transform transition-all duration-300 ${
+                      activeTab === 'crash'
+                        ? 'bg-gradient-to-r from-fuchsia-500 to-purple-600 scale-110 shadow-2xl glow-purple border-2 border-fuchsia-300'
+                        : 'bg-gray-800 hover:bg-purple-900 hover:scale-105 border-2 border-gray-700'
+                    }`}
+                  >
+                    <div className="text-3xl mb-1">💎</div>
+                    <div className="text-xs">Crash</div>
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('coinflip')}
+                    className={`px-6 py-3 rounded-2xl font-bold text-lg transform transition-all duration-300 ${
+                      activeTab === 'coinflip'
+                        ? 'bg-gradient-to-r from-purple-500 to-fuchsia-600 scale-110 shadow-2xl glow-purple border-2 border-purple-300'
+                        : 'bg-gray-800 hover:bg-purple-900 hover:scale-105 border-2 border-gray-700'
+                    }`}
+                  >
+                    <div className="text-3xl mb-1">🪙</div>
+                    <div className="text-xs">Coin Flip</div>
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('dice')}
+                    className={`px-6 py-3 rounded-2xl font-bold text-lg transform transition-all duration-300 ${
+                      activeTab === 'dice'
+                        ? 'bg-gradient-to-r from-fuchsia-500 to-purple-600 scale-110 shadow-2xl glow-purple border-2 border-fuchsia-300'
+                        : 'bg-gray-800 hover:bg-purple-900 hover:scale-105 border-2 border-gray-700'
+                    }`}
+                  >
+                    <div className="text-3xl mb-1">🎲</div>
+                    <div className="text-xs">Dice</div>
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('roulette')}
+                    className={`px-6 py-3 rounded-2xl font-bold text-lg transform transition-all duration-300 ${
+                      activeTab === 'roulette'
+                        ? 'bg-gradient-to-r from-violet-500 to-purple-600 scale-110 shadow-2xl glow-purple border-2 border-violet-300'
+                        : 'bg-gray-800 hover:bg-purple-900 hover:scale-105 border-2 border-gray-700'
+                    }`}
+                  >
+                    <div className="text-3xl mb-1">🎡</div>
+                    <div className="text-xs">Roulette</div>
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('referidos')}
+                    className={`px-6 py-3 rounded-2xl font-bold text-lg transform transition-all duration-300 ${
+                      activeTab === 'referidos'
+                        ? 'bg-gradient-to-r from-green-500 to-emerald-600 scale-110 shadow-2xl glow-purple border-2 border-green-300'
+                        : 'bg-gray-800 hover:bg-purple-900 hover:scale-105 border-2 border-gray-700'
+                    }`}
+                  >
+                    <div className="text-3xl mb-1">🤝</div>
+                    <div className="text-xs">Referidos</div>
+                  </button>
+                </div>
+
+                {/* Game Components */}
+                {activeTab === 'crash' && (
+                  <CrashGame signer={signer} setMessage={setMessage} setLoading={setLoading} setShowConfetti={setShowConfetti} />
+                )}
+                {activeTab === 'coinflip' && (
+                  <CoinFlipGame signer={signer} setMessage={setMessage} setLoading={setLoading} setShowConfetti={setShowConfetti} />
+                )}
+                {activeTab === 'dice' && (
+                  <DiceGame signer={signer} setMessage={setMessage} setLoading={setLoading} setShowConfetti={setShowConfetti} />
+                )}
+                {activeTab === 'roulette' && (
+                  <RouletteGame signer={signer} setMessage={setMessage} setLoading={setLoading} setShowConfetti={setShowConfetti} />
+                )}
+                {activeTab === 'referidos' && (
+                  <ReferralSystem address={address} />
+                )}
+              </div>
+            </div>
           </>
         )}
       </main>
