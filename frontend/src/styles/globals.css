@@ -59,21 +59,28 @@ body {
   animation-delay: 4s;
 }
 
-/* Efectos de glow para casino */
+/* Efectos de glow para casino - Morado Neón */
+.glow-purple {
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.6),
+              0 0 40px rgba(168, 85, 247, 0.4),
+              0 0 60px rgba(168, 85, 247, 0.2),
+              0 0 80px rgba(168, 85, 247, 0.1);
+}
+
 .glow {
-  box-shadow: 0 0 20px rgba(251, 191, 36, 0.5),
-              0 0 40px rgba(251, 191, 36, 0.3),
-              0 0 60px rgba(251, 191, 36, 0.2);
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.6),
+              0 0 40px rgba(168, 85, 247, 0.4),
+              0 0 60px rgba(168, 85, 247, 0.2);
 }
 
-.glow-red {
-  box-shadow: 0 0 20px rgba(239, 68, 68, 0.5),
-              0 0 40px rgba(239, 68, 68, 0.3);
+.glow-fuchsia {
+  box-shadow: 0 0 20px rgba(232, 121, 249, 0.6),
+              0 0 40px rgba(232, 121, 249, 0.4);
 }
 
-.glow-green {
-  box-shadow: 0 0 20px rgba(16, 185, 129, 0.5),
-              0 0 40px rgba(16, 185, 129, 0.3);
+.glow-violet {
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.6),
+              0 0 40px rgba(139, 92, 246, 0.4);
 }
 
 /* Estilo para inputs de número */
@@ -83,24 +90,28 @@ input[type="number"]::-webkit-outer-spin-button {
   height: 50px;
 }
 
-/* Estilo para range slider */
+/* Estilo para range slider - Morado Neón */
 input[type="range"]::-webkit-slider-thumb {
   appearance: none;
-  width: 25px;
-  height: 25px;
-  background: #10b981;
+  width: 28px;
+  height: 28px;
+  background: linear-gradient(135deg, #a855f7, #ec4899);
   cursor: pointer;
   border-radius: 50%;
-  box-shadow: 0 0 10px rgba(16, 185, 129, 0.8);
+  box-shadow: 0 0 15px rgba(168, 85, 247, 0.8),
+              0 0 25px rgba(168, 85, 247, 0.4);
+  border: 2px solid #ffffff;
 }
 
 input[type="range"]::-moz-range-thumb {
-  width: 25px;
-  height: 25px;
-  background: #10b981;
+  width: 28px;
+  height: 28px;
+  background: linear-gradient(135deg, #a855f7, #ec4899);
   cursor: pointer;
   border-radius: 50%;
-  box-shadow: 0 0 10px rgba(16, 185, 129, 0.8);
+  box-shadow: 0 0 15px rgba(168, 85, 247, 0.8),
+              0 0 25px rgba(168, 85, 247, 0.4);
+  border: 2px solid #ffffff;
 }
 
 /* Cursor personalizado para elementos interactivos */
@@ -108,18 +119,56 @@ button:hover {
   cursor: pointer;
 }
 
-/* Efectos de pulso mejorados */
+/* Efectos de pulso mejorados - Morado Neón */
 @keyframes pulse-glow {
   0%, 100% {
     opacity: 1;
-    box-shadow: 0 0 20px rgba(251, 191, 36, 0.5);
+    box-shadow: 0 0 20px rgba(168, 85, 247, 0.6),
+                0 0 30px rgba(168, 85, 247, 0.3);
   }
   50% {
-    opacity: 0.8;
-    box-shadow: 0 0 40px rgba(251, 191, 36, 0.8);
+    opacity: 0.9;
+    box-shadow: 0 0 40px rgba(168, 85, 247, 0.8),
+                0 0 60px rgba(168, 85, 247, 0.5),
+                0 0 80px rgba(168, 85, 247, 0.3);
   }
 }
 
 .animate-pulse-glow {
   animation: pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Animación de partículas flotantes */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px) translateX(0px);
+  }
+  33% {
+    transform: translateY(-20px) translateX(10px);
+  }
+  66% {
+    transform: translateY(-10px) translateX(-10px);
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+/* Efecto de brillo intenso */
+@keyframes neon-pulse {
+  0%, 100% {
+    text-shadow: 0 0 10px rgba(168, 85, 247, 0.8),
+                 0 0 20px rgba(168, 85, 247, 0.6),
+                 0 0 30px rgba(168, 85, 247, 0.4);
+  }
+  50% {
+    text-shadow: 0 0 20px rgba(168, 85, 247, 1),
+                 0 0 40px rgba(168, 85, 247, 0.8),
+                 0 0 60px rgba(168, 85, 247, 0.6);
+  }
+}
+
+.text-neon {
+  animation: neon-pulse 2s ease-in-out infinite;
 }
